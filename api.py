@@ -1,144 +1,155 @@
+# GOOGLE TRANSLATED
+
 """
 # api.py usage
 
-` python api.py -dr "123.wav" -dt "一二三。" -dl "zh" `
+` python api.py -dr "123.wav" -dt "One two three. " -dl "zh" `
 
-## 执行参数:
+## Execution parameters:
 
-`-s` - `SoVITS模型路径, 可在 config.py 中指定`
-`-g` - `GPT模型路径, 可在 config.py 中指定`
+`-s` - `SoVITS model path, can be specified in config.py`
 
-调用请求缺少参考音频时使用
-`-dr` - `默认参考音频路径`
-`-dt` - `默认参考音频文本`
-`-dl` - `默认参考音频语种, "中文","英文","日文","韩文","粤语,"zh","en","ja","ko","yue"`
+`-g` - `GPT model path, can be specified in config.py`
 
-`-d` - `推理设备, "cuda","cpu"`
-`-a` - `绑定地址, 默认"127.0.0.1"`
-`-p` - `绑定端口, 默认9880, 可在 config.py 中指定`
-`-fp` - `覆盖 config.py 使用全精度`
-`-hp` - `覆盖 config.py 使用半精度`
-`-sm` - `流式返回模式, 默认不启用, "close","c", "normal","n", "keepalive","k"`
-·-mt` - `返回的音频编码格式, 流式默认ogg, 非流式默认wav, "wav", "ogg", "aac"`
-·-st` - `返回的音频数据类型, 默认int16, "int16", "int32"`
-·-cp` - `文本切分符号设定, 默认为空, 以",.，。"字符串的方式传入`
+Used when the call request lacks reference audio
 
-`-hb` - `cnhubert路径`
-`-b` - `bert路径`
+`-dr` - `Default reference audio path`
 
-## 调用:
+`-dt` - `Default reference audio text`
 
-### 推理
+`-dl` - `Default reference audio language, "Chinese", "English", "Japanese", "Korean", "Cantonese,"zh", "en", "ja", "ko", "yue"`
+
+`-d` - `Inference device, "cuda", "cpu"`
+
+`-a` - `Bind address, default "127.0.0.1"`
+
+`-p` - `Bind port, default 9880, can be specified in config.py`
+
+`-fp` - `Override config.py to use full precision`
+
+`-hp` - `Override config.py Use half precision`
+`-sm` - `Streaming return mode, not enabled by default, "close", "c", "normal", "n", "keepalive", "k"`
+·-mt` - `Returned audio encoding format, streaming default ogg, non-streaming default wav, "wav", "ogg", "aac"`
+·-st` - `Returned audio data type, default int16, "int16", "int32"`
+·-cp` - `Text segmentation symbol setting, default is empty, passed in as ".，." string`
+
+`-hb` - `cnhubert path`
+
+`-b` - `bert path`
+
+## Call:
+
+### Inference
 
 endpoint: `/`
 
-使用执行参数指定的参考音频:
+Use the reference audio specified by the execution parameter:
+
 GET:
-    `http://127.0.0.1:9880?text=先帝创业未半而中道崩殂，今天下三分，益州疲弊，此诚危急存亡之秋也。&text_language=zh`
+`http://127.0.0.1:9880?text=The former emperor died before he had completed his career. Today, the world is divided into three parts, and Yizhou is exhausted. This is truly a critical moment for survival. &text_language=zh`
 POST:
 ```json
 {
-    "text": "先帝创业未半而中道崩殂，今天下三分，益州疲弊，此诚危急存亡之秋也。",
-    "text_language": "zh"
+"text": "The former emperor died before he had completed his career. Today, the world is divided into three parts, and Yizhou is exhausted. This is truly a critical moment for survival.",
+"text_language": "zh"
 }
 ```
 
-使用执行参数指定的参考音频并设定分割符号:
+Use the reference audio specified by the execution parameter and set the delimiter:
 GET:
-    `http://127.0.0.1:9880?text=先帝创业未半而中道崩殂，今天下三分，益州疲弊，此诚危急存亡之秋也。&text_language=zh&cut_punc=，。`
+`http://127.0.0.1:9880?text=The former emperor died before he had completed his career. Today, the world is divided into three parts, and Yizhou is exhausted. This is truly a critical moment for survival. &text_language=zh&cut_punc=，。 `
 POST:
 ```json
 {
-    "text": "先帝创业未半而中道崩殂，今天下三分，益州疲弊，此诚危急存亡之秋也。",
-    "text_language": "zh",
-    "cut_punc": "，。",
+"text": "The late emperor died before he could finish his career. Today, the world is divided into three parts, and Yizhou is exhausted. This is truly a critical moment for survival.",
+"text_language": "zh",
+"cut_punc": "，。",
 }
 ```
 
-手动指定当次推理所使用的参考音频:
+Manually specify the reference audio used for this reasoning:
 GET:
-    `http://127.0.0.1:9880?refer_wav_path=123.wav&prompt_text=一二三。&prompt_language=zh&text=先帝创业未半而中道崩殂，今天下三分，益州疲弊，此诚危急存亡之秋也。&text_language=zh`
+`http://127.0.0.1:9880?refer_wav_path=123.wav&prompt_text=一二三。 &prompt_language=zh&text=The late emperor died before he could finish his career. Today, the world is divided into three parts, and Yizhou is exhausted. This is truly a critical moment for survival. &text_language=zh`
 POST:
 ```json
 {
-    "refer_wav_path": "123.wav",
-    "prompt_text": "一二三。",
-    "prompt_language": "zh",
-    "text": "先帝创业未半而中道崩殂，今天下三分，益州疲弊，此诚危急存亡之秋也。",
-    "text_language": "zh"
-}
-```
-
-RESP:
-成功: 直接返回 wav 音频流， http code 200
-失败: 返回包含错误信息的 json, http code 400
-
-手动指定当次推理所使用的参考音频，并提供参数:
-GET:
-    `http://127.0.0.1:9880?refer_wav_path=123.wav&prompt_text=一二三。&prompt_language=zh&text=先帝创业未半而中道崩殂，今天下三分，益州疲弊，此诚危急存亡之秋也。&text_language=zh&top_k=20&top_p=0.6&temperature=0.6&speed=1&inp_refs="456.wav"&inp_refs="789.wav"`
-POST:
-```json
-{
-    "refer_wav_path": "123.wav",
-    "prompt_text": "一二三。",
-    "prompt_language": "zh",
-    "text": "先帝创业未半而中道崩殂，今天下三分，益州疲弊，此诚危急存亡之秋也。",
-    "text_language": "zh",
-    "top_k": 20,
-    "top_p": 0.6,
-    "temperature": 0.6,
-    "speed": 1,
-    "inp_refs": ["456.wav","789.wav"]
+"refer_wav_path": "123.wav",
+"prompt_text": "一二三。",
+"prompt_language": "zh",
+"text": "The late emperor died before he could complete his career. Today, the world is divided into three parts, and Yizhou is exhausted. This is truly a critical moment for survival.",
+"text_language": "zh"
 }
 ```
 
 RESP:
-成功: 直接返回 wav 音频流， http code 200
-失败: 返回包含错误信息的 json, http code 400
+Success: Returns wav audio stream directly, http code 200
+Failure: Returns json containing error information, http code 400
 
+Manually specify the reference audio used for the current reasoning and provide parameters:
+GET:
+`http://127.0.0.1:9880?refer_wav_path=123.wav&prompt_text=一二三。 &prompt_language=zh&text=The late emperor passed away before he could complete his career. Today, the world is divided into three parts and Yizhou is exhausted. This is truly a critical moment for our survival. &text_language=zh&top_k=20&top_p=0.6&temperature=0.6&speed=1&inp_refs="456.wav"&inp_refs="789.wav"`
+POST:
+```json
+{
+"refer_wav_path": "123.wav",
+"prompt_text": "One, two, three.",
+"prompt_language": "zh",
+"text": "The late emperor died before he could complete his career. Today, the world is divided into three parts, and Yizhou is exhausted. This is truly a critical moment for survival.",
+"text_language": "zh",
+"top_k": 20,
+"top_p": 0.6,
+"temperature": 0.6,
+"speed": 1,
+"inp_refs": ["456.wav","789.wav"]
+}
+```
 
-### 更换默认参考音频
+RESP:
+Success: Return directly wav audio stream, http code 200
+Failure: Returns json containing error information, http code 400
+
+### Change the default reference audio
 
 endpoint: `/change_refer`
 
-key与推理端一样
+The key is the same as the inference end
 
 GET:
-    `http://127.0.0.1:9880/change_refer?refer_wav_path=123.wav&prompt_text=一二三。&prompt_language=zh`
+`http://127.0.0.1:9880/change_refer?refer_wav_path=123.wav&prompt_text=一二三。 &prompt_language=zh`
 POST:
 ```json
 {
-    "refer_wav_path": "123.wav",
-    "prompt_text": "一二三。",
-    "prompt_language": "zh"
+"refer_wav_path": "123.wav",
+"prompt_text": "一二三。",
+"prompt_language": "zh"
 }
 ```
 
 RESP:
-成功: json, http code 200
-失败: json, 400
+Success: json, http code 200
+Failure: json, 400
 
-
-### 命令控制
+### Command control
 
 endpoint: `/control`
 
 command:
-"restart": 重新运行
-"exit": 结束运行
+"restart": Restart
+"exit": End the run
 
 GET:
-    `http://127.0.0.1:9880/control?command=restart`
+`http://127.0.0.1:9880/control?command=restart`
 POST:
 ```json
 {
-    "command": "restart"
+"command": "restart"
 }
 ```
 
-RESP: 无
+RESP: None
 
 """
+
 
 
 import argparse
@@ -911,25 +922,31 @@ g_config = global_config.Config()
 # 获取参数
 parser = argparse.ArgumentParser(description="GPT-SoVITS api")
 
-parser.add_argument("-s", "--sovits_path", type=str, default=g_config.sovits_path, help="SoVITS模型路径")
-parser.add_argument("-g", "--gpt_path", type=str, default=g_config.gpt_path, help="GPT模型路径")
-parser.add_argument("-dr", "--default_refer_path", type=str, default="", help="默认参考音频路径")
-parser.add_argument("-dt", "--default_refer_text", type=str, default="", help="默认参考音频文本")
-parser.add_argument("-dl", "--default_refer_language", type=str, default="", help="默认参考音频语种")
+parser.add_argument("-s", "--sovits_path", type=str, default=g_config.sovits_path, help="Path to the SoVITS model")
+parser.add_argument("-g", "--gpt_path", type=str, default=g_config.gpt_path, help="Path to the GPT model")
+parser.add_argument("-dr", "--default_refer_path", type=str, default="", help="Default reference audio path")
+parser.add_argument("-dt", "--default_refer_text", type=str, default="", help="Default reference audio text")
+parser.add_argument("-dl", "--default_refer_language", type=str, default="", help="Default reference audio language")
 parser.add_argument("-d", "--device", type=str, default=g_config.infer_device, help="cuda / cpu")
 parser.add_argument("-a", "--bind_addr", type=str, default="0.0.0.0", help="default: 0.0.0.0")
 parser.add_argument("-p", "--port", type=int, default=g_config.api_port, help="default: 9880")
-parser.add_argument("-fp", "--full_precision", action="store_true", default=False, help="覆盖config.is_half为False, 使用全精度")
-parser.add_argument("-hp", "--half_precision", action="store_true", default=False, help="覆盖config.is_half为True, 使用半精度")
-# bool值的用法为 `python ./api.py -fp ...`
-# 此时 full_precision==True, half_precision==False
-parser.add_argument("-sm", "--stream_mode", type=str, default="close", help="流式返回模式, close / normal / keepalive")
-parser.add_argument("-mt", "--media_type", type=str, default="wav", help="音频编码格式, wav / ogg / aac")
-parser.add_argument("-st", "--sub_type", type=str, default="int16", help="音频数据类型, int16 / int32")
-parser.add_argument("-cp", "--cut_punc", type=str, default="", help="文本切分符号设定, 符号范围,.;?!、，。？！；：…")
-# 切割常用分句符为 `python ./api.py -cp ".?!。？！"`
-parser.add_argument("-hb", "--hubert_path", type=str, default=g_config.cnhubert_path, help="覆盖config.cnhubert_path")
-parser.add_argument("-b", "--bert_path", type=str, default=g_config.bert_path, help="覆盖config.bert_path")
+parser.add_argument("-fp", "--full_precision", action="store_true", default=False, help="Override config.is_half to False, use full precision")
+parser.add_argument("-hp", "--half_precision", action="store_true", default=False, help="Override config.is_half to True, use half precision")
+# For bool values, use `python ./api.py -fp ...`
+# Here, full_precision == True, half_precision == False
+parser.add_argument("-sm", "--stream_mode", type=str, default="close", help="Streaming return mode, close / normal / keepalive")
+parser.add_argument("-mt", "--media_type", type=str, default="wav", help="Audio encoding format, wav / ogg / aac")
+parser.add_argument("-st", "--sub_type", type=str, default="int16", help="Audio data type, int16 / int32")
+parser.add_argument("-cp", "--cut_punc", type=str, default="", help="Text split symbols setting, symbol range: .;?!、，。？！；：…")
+# Use common sentence delimiters for cutting: `python ./api.py -cp ".?!。？！"`
+parser.add_argument("-hb", "--hubert_path", type=str, default=g_config.cnhubert_path, help="Override config.cnhubert_path")
+parser.add_argument("-b", "--bert_path", type=str, default=g_config.bert_path, help="Override config.bert_path")
+
+parser.add_argument("-ir", "--inp_refs", type=str, nargs='+', default=[], help="Set the default extra input references")
+parser.add_argument("-tk", "--top_k", type=int, default=15, help="Set the default extra input references")
+parser.add_argument("-tp", "--top_p", type=float, default=1, help="Set the default extra input references")
+parser.add_argument("-tm", "--temperature", type=float, default=1.0, help="Set the default extra input references")
+
 
 args = parser.parse_args()
 sovits_path = args.sovits_path
@@ -940,6 +957,7 @@ host = args.bind_addr
 cnhubert_base_path = args.hubert_path
 bert_path = args.bert_path
 default_cut_punc = args.cut_punc
+
 
 # 应用参数配置
 default_refer = DefaultRefer(args.default_refer_path, args.default_refer_text, args.default_refer_language)
@@ -1065,6 +1083,7 @@ async def change_refer(
 @app.post("/")
 async def tts_endpoint(request: Request):
     json_post_raw = await request.json()
+
     return handle(
         json_post_raw.get("refer_wav_path"),
         json_post_raw.get("prompt_text"),
@@ -1072,11 +1091,11 @@ async def tts_endpoint(request: Request):
         json_post_raw.get("text"),
         json_post_raw.get("text_language"),
         json_post_raw.get("cut_punc"),
-        json_post_raw.get("top_k", 15),
-        json_post_raw.get("top_p", 1.0),
-        json_post_raw.get("temperature", 1.0),
+        json_post_raw.get("top_k", args.top_k),
+        json_post_raw.get("top_p", args.top_p),
+        json_post_raw.get("temperature", args.temperature),
         json_post_raw.get("speed", 1.0),
-        json_post_raw.get("inp_refs", []),
+        json_post_raw.get("inp_refs", args.inp_refs),
         json_post_raw.get("sample_steps", 32),
         json_post_raw.get("if_sr", False) 
     )

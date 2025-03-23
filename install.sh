@@ -12,7 +12,7 @@ export CMAKE_MAKE_PROGRAM="$CONDA_PREFIX/bin/cmake"
 export CC="$CONDA_PREFIX/bin/gcc"
 export CXX="$CONDA_PREFIX/bin/g++"
 
-conda install pytorch==2.1.1 torchvision==0.16.1 torchaudio==2.1.1 pytorch-cuda=11.8 -c pytorch -c nvidia
+conda install pytorch torchvision torchaudio pytorch-cuda -c pytorch -c nvidia
 
 # 刷新环境
 # Refresh environment
